@@ -10,6 +10,10 @@ fn main() {
         process::exit(1)
     });
 
+    run(config)
+}
+
+fn run(config: Config) -> () {
     let file_content = fs::read_to_string(&config.file_path)
         .expect("Can't read file content");
 
