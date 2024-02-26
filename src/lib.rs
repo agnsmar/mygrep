@@ -41,25 +41,29 @@ impl Config {
     }
 }
 
-pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
+pub fn search<'a>(query: &str, contents: &'a str) -> Vec<String> {
     let mut results = Vec::new();
 
+    let mut count = 1;
     for line in contents.lines() {
         if line.contains(query) {
-            results.push(line);
+            results.push(count.to_string() + ": " + line);
         }
+        count += 1;
     }
     results
 }
 
-pub fn search_case_insensitive<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
+pub fn search_case_insensitive<'a>(query: &str, contents: &'a str) -> Vec<String> {
     let query = query.to_lowercase();
     let mut results = Vec::new();
 
+    let mut count = 1;
     for line in contents.lines() {
         if line.to_lowercase().contains(&query) {
-            results.push(line);
+            results.push(count.to_string() + ": " + line);
         }
+        count += 1;
     }
 
     results
