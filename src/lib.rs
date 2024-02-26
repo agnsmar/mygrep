@@ -1,3 +1,4 @@
+use colored::{ColoredString, Colorize};
 use std::error::Error;
 use std::{env, fs};
 
@@ -10,8 +11,8 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
         search(&config.query, &file_content)
     };
 
-    for line in results {
-        println!("{line}");
+    for mut line in results {
+        line.print();
     }
 
     Ok(())
@@ -41,27 +42,64 @@ impl Config {
     }
 }
 
-pub fn search<'a>(query: &str, contents: &'a str) -> Vec<String> {
+pub struct Line {
+    line_number: i32,
+    words: Vec<ColoredString>,
+}
+
+impl Line {
+    fn new(line_number: i32, words: Vec<ColoredString>) -> Line {
+        Line { line_number, words }
+    }
+
+    fn print(&mut self) -> () {
+        print!("{}: ", self.line_number);
+        for word in &self.words {
+            print!("{word} ");
+        }
+        println!()
+    }
+}
+
+pub fn search<'a>(query: &str, contents: &'a str) -> Vec<Line> {
     let mut results = Vec::new();
 
     let mut count = 1;
     for line in contents.lines() {
         if line.contains(query) {
-            results.push(count.to_string() + ": " + line);
+            let words: Vec<&str> = line.split(" ").collect();
+            let mut result: Vec<ColoredString> = Vec::new();
+            for word in words {
+                if word.contains(query) {
+                    result.push(word.green().bold().underline());
+                } else {
+                    result.push(word.white());
+                }
+            }
+            results.push(Line::new(count, result));
         }
         count += 1;
     }
     results
 }
 
-pub fn search_case_insensitive<'a>(query: &str, contents: &'a str) -> Vec<String> {
+pub fn search_case_insensitive<'a>(query: &str, contents: &'a str) -> Vec<Line> {
     let query = query.to_lowercase();
     let mut results = Vec::new();
 
     let mut count = 1;
     for line in contents.lines() {
         if line.to_lowercase().contains(&query) {
-            results.push(count.to_string() + ": " + line);
+            let words: Vec<&str> = line.split(" ").collect();
+            let mut result: Vec<ColoredString> = Vec::new();
+            for word in words {
+                if word.to_lowercase().contains(&query) {
+                    result.push(word.green().bold().underline());
+                } else {
+                    result.push(word.white());
+                }
+            }
+            results.push(Line::new(count, result));
         }
         count += 1;
     }
